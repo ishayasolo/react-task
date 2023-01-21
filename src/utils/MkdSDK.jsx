@@ -5,6 +5,7 @@ export default function MkdSDK() {
   this._table = "";
   this._custom = "";
   this._method = "";
+  this._key = "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==";
 
   const raw = this._project_id + ":" + this._secret;
   let base64Encode = btoa(raw);
@@ -14,7 +15,25 @@ export default function MkdSDK() {
   };
   
   this.login = async function (email, password, role) {
-    //TODO
+    const headers = {
+      "Content-Type": "application/json",
+      "x-project": this._key,
+    };
+    const body = JSON.stringify({
+      email,
+      password,
+      role
+    });
+    const response = await fetch(
+      `${this._baseurl}/v2/api/lambda/login`,
+      {
+        method: 'POST',
+        headers,
+        body
+      }
+    );
+    const data = await response.json();
+    return data;
   };
 
   this.getHeader = function () {
@@ -86,8 +105,23 @@ export default function MkdSDK() {
     }
   };  
 
-  this.check = async function (role) {
-    //TODO
+  this.check = async function (role, token) {
+    const headers = {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+      "x-project": this._key,
+    };
+    const body = JSON.stringify({ role });
+    const response = await fetch(
+      `${this._baseurl}/v2/api/lambda/check`,
+      {
+        method: 'POST',
+        headers,
+        body
+      }
+    );
+    const data = await response.json();
+    return data;
   };
 
   return this;

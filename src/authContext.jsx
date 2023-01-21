@@ -2,20 +2,26 @@ import React, { useReducer } from "react";
 import MkdSDK from "./utils/MkdSDK";
 
 export const AuthContext = React.createContext();
+const userData = JSON.parse(localStorage.getItem("user-data") || "{}")
 
 const initialState = {
-  isAuthenticated: false,
-  user: null,
-  token: null,
-  role: null,
+  ...userData,
+  isAuthenticated: !!userData?.token
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
     case "LOGIN":
-      //TODO
+      localStorage.setItem("user-data", JSON.stringify({
+        ...action.payload,
+        user: action.payload?.user_id
+      }))
       return {
         ...state,
+        user: action.payload?.user_id,
+        token: action.payload?.token,
+        role: action.payload?.role,
+        isAuthenticated: true,
       };
     case "LOGOUT":
       localStorage.clear();
@@ -31,8 +37,7 @@ const reducer = (state, action) => {
 
 let sdk = new MkdSDK();
 
-export const tokenExpireError = (dispatch, errorMessage) => {
-  const role = localStorage.getItem("role");
+export const tokenExpireError = (dispatch, errorMessage, role = "admin") => {
   if (errorMessage === "TOKEN_EXPIRED") {
     dispatch({
       type: "Logout",
@@ -44,8 +49,17 @@ export const tokenExpireError = (dispatch, errorMessage) => {
 const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const tokenValidity = async () => {
+    const response = await sdk.check(state.role, state.token)
+    if (response.error) {
+      tokenExpireError(dispatch, response.message, state.role)
+    }
+  }
+
   React.useEffect(() => {
-    //TODO
+    if (!window.location.pathname.includes("login")) {
+      tokenValidity()
+    }
   }, []);
 
   return (
@@ -61,3 +75,10 @@ const AuthProvider = ({ children }) => {
 };
 
 export default AuthProvider;
+
+/**
+ * {
+  * error: false,
+  * message: "ok",
+ * }
+ */

@@ -1,6 +1,6 @@
 import React from "react";
 import { AuthContext } from "./authContext";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import SnackBar from "./components/SnackBar";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminLoginPage from "./pages/AdminLoginPage";
@@ -31,6 +31,12 @@ function renderRoutes(role) {
 
 function Main() {
   const { state } = React.useContext(AuthContext);
+
+  // useEffect(() => {
+  //   if (!state?.isAuthenticated) {
+  //     window.location.href = "/admin/login"
+  //   }
+  // }, [])
 
   return (
     <div className="h-full">
